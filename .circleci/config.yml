@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.1
 
 jobs:
   build-frontend:
@@ -34,6 +36,11 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
+      - slack/notify:
+          event: fail
+          # mentions: "@here"
+          template: basic_fail_1
+
 
   test-frontend:
     docker:
@@ -48,6 +55,9 @@ jobs:
             cd frontend
             npm install
             npm run test
+      - slack/notify:
+          event: pass
+          template: success_tagged_deploy_1
 
   test-backend:
     docker:
@@ -90,14 +100,19 @@ jobs:
             cd backend
             npm install
             npm audit --audit-level=critical
+
 workflows:
   default:
     jobs:
       - build-frontend
-      - build-backend
+      - build-backend:
+          context:
+            - slack-secrets
       - test-frontend:
           requires: [build-frontend]
       - test-backend:
+          context:
+            - slack-secrets
           requires: [build-backend]
       - scan-frontend:
           requires: [build-frontend]
