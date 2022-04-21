@@ -27,12 +27,11 @@ async function bootstrap() {
     .setDescription('Glee2 API')
     .setVersion('1.0')
     .addTag('customTag')
-    .setBasePath(apiVersionPrefix)
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup(`api/${apiVersionPrefix}`, app, document);
-  const config: ConfigService = app.get('ConfigService');
+  const config: ConfigService = app.get(ConfigService);
   const whitelist = config.CORS_WHITELIST;
   const corsOptions = {
     origin(origin, callback) {
