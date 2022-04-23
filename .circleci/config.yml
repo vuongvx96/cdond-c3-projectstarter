@@ -195,9 +195,13 @@ jobs:
 
   run-migrations:
     docker:
-      - image: circleci/node:13.8.0
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints: ["73:2a:c1:d7:4b:10:1e:2f:cf:27:e0:34:22:60:0a:1e"]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Run migrations
           command: |
@@ -218,6 +222,45 @@ jobs:
       - destroy-environment:
           workflowid: "${CIRCLE_WORKFLOW_ID:0:7}"  
 
+  deploy-frontend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update curl nodejs npm
+            apk add --update curl tar
+            npm install
+            pip install awscli
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Get backend url
+          command: |
+            export BACKEND_IP=$(aws ec2 describe-instances \
+            --query 'Reservations[*].Instances[*].PublicDnsName' \
+            --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" \
+            --output text)
+            export API_URL="http://${BACKEND_IP}:3030"
+            echo "${API_URL}"
+            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            cat frontend/.env
+      - run:
+          name: Deploy frontend objects
+          command: |
+            cd frontend
+            npm install
+            npm run build
+            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - destroy-environment:
+          workflowid: "${CIRCLE_WORKFLOW_ID:0:7}" 
+      
 workflows:
   default:
     jobs:
@@ -241,3 +284,5 @@ workflows:
           requires: [deploy-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
+      - deploy-frontend:
+          requires: [run-migrations]
