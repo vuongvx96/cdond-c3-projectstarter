@@ -224,16 +224,9 @@ jobs:
 
   deploy-frontend:
     docker:
-      - image: python:3.7-alpine3.11
+      - image: sleavely/node-awscli:14.x
     steps:
       - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --update curl nodejs npm
-            apk add --update curl tar
-            npm install
-            pip install awscli
       - attach_workspace:
           at: ~/
       - run:
@@ -260,7 +253,37 @@ jobs:
           template: basic_fail_1
       - destroy-environment:
           workflowid: "${CIRCLE_WORKFLOW_ID:0:7}" 
-      
+
+  deploy-backend:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["73:2a:c1:d7:4b:10:1e:2f:cf:27:e0:34:22:60:0a:1e"]
+      - attach_workspace:
+          at: ~/
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update tar gzip ansible nodejs npm
+            pip install awscli
+      - run:
+          name: Deploy backend
+          command: |
+            cd backend
+            npm i
+            npm run build
+            cd ..
+            tar -C backend -czvf artifact.tar.gz .
+            cp artifact.tar.gz .circleci/ansible
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      - slack/notify:
+          event: fail
+          template: basic_fail_1
+      - destroy-environment:
+          workflowid: "${CIRCLE_WORKFLOW_ID:0:7}" 
 workflows:
   default:
     jobs:
@@ -285,4 +308,6 @@ workflows:
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
+          requires: [run-migrations]
+      - deploy-backend:
           requires: [run-migrations]
