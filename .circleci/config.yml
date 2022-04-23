@@ -171,6 +171,16 @@ jobs:
   configure-infrastructure:
     docker:
       - image: python:3.7-alpine3.11
+        environment:
+          NODE_ENV: $NODE_ENV
+          VERSION: $VERSION
+          TYPEORM_CONNECTION: $TYPEORM_CONNECTION
+          TYPEORM_HOST: $TYPEORM_HOST
+          TYPEORM_USERNAME: $TYPEORM_USERNAME
+          TYPEORM_PASSWORD: $TYPEORM_PASSWORD
+          TYPEORM_DATABASE: $TYPEORM_DATABASE
+          TYPEORM_PORT: $TYPEORM_PORT
+          TYPEORM_ENTITIES: $TYPEORM_ENTITIES
     steps:
       - checkout
       - add_ssh_keys:
@@ -198,6 +208,8 @@ jobs:
       - image: sleavely/node-awscli:14.x
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - add_ssh_keys:
           fingerprints: ["73:2a:c1:d7:4b:10:1e:2f:cf:27:e0:34:22:60:0a:1e"]
       - attach_workspace:
@@ -239,6 +251,7 @@ jobs:
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
+            curl https://kvdb.io/E2EWQQcGaY9xGnoPaidEtG/apiurl -d ${API_URL}
             cat frontend/.env
       - run:
           name: Deploy frontend objects
@@ -267,6 +280,7 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update tar gzip ansible nodejs npm
+            apk --no-cache add curl
             pip install awscli
       - run:
           name: Deploy backend
@@ -283,7 +297,48 @@ jobs:
           event: fail
           template: basic_fail_1
       - destroy-environment:
-          workflowid: "${CIRCLE_WORKFLOW_ID:0:7}" 
+          workflowid: "${CIRCLE_WORKFLOW_ID:0:7}"
+
+  smoke-test:
+    docker:
+      - image: python:3.7-alpine3.11
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            apk --no-cache add curl
+            pip install awscli
+      - run:
+          name: Get backend url
+          command: |
+            API_URL=$(curl --insecure https://kvdb.io/E2EWQQcGaY9xGnoPaidEtG/apiurl)
+            export API_URL=$API_URL
+      - run:
+          name: Backend smoke test.
+          command: |
+            echo "${API_URL}"
+            if curl "${API_URL}/api/status" | grep "ok"
+            then
+              return 0
+            else
+              return 1
+            fi
+      - run:
+          name: Frontend smoke test.
+          command: |
+            URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            echo ${URL} 
+            if curl -s ${URL} | grep "Welcome"
+            then
+                # Change this to 0 after the job fails
+              return 1
+            else
+              return 1
+            fi
+      - destroy-environment:
+          workflowid: "${CIRCLE_WORKFLOW_ID:0:7}"
+
 workflows:
   default:
     jobs:
@@ -311,3 +366,5 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
+      # - smoke-test:
+          # requires: [deploy-backend, deploy-frontend]
