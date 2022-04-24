@@ -310,13 +310,9 @@ jobs:
             apk --no-cache add curl
             pip install awscli
       - run:
-          name: Get backend url
-          command: |
-            API_URL=$(curl --insecure https://kvdb.io/E2EWQQcGaY9xGnoPaidEtG/apiurl)
-            export API_URL=$API_URL
-      - run:
           name: Backend smoke test.
           command: |
+            API_URL=$(curl --insecure https://kvdb.io/E2EWQQcGaY9xGnoPaidEtG/apiurl)
             echo "${API_URL}"
             if curl "${API_URL}/api/status" | grep "ok"
             then
@@ -366,5 +362,5 @@ workflows:
           requires: [run-migrations]
       - deploy-backend:
           requires: [run-migrations]
-      # - smoke-test:
-      #     requires: [deploy-backend, deploy-frontend]
+      - smoke-test:
+          requires: [deploy-backend, deploy-frontend]

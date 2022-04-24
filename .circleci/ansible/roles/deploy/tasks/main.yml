@@ -19,24 +19,22 @@
     production: yes
     state: present
 
-- name: "Copy backend artifact"
-  copy:
-    src: artifact.tar.gz
-    dest: ~/artifact.tar.gz
-
 - name: Creates directory
   file:
     path: /home/ubuntu/backend
     state: directory
 
-- name: Extract artifact.tar.gz file
-  shell:
-    cmd: tar -xvzf artifact.tar.gz -C backend
-    chdir: /home/ubuntu
+- name: Unarchives the compressed artifact file
+  unarchive:
+    src: artifact.tar.gz
+    dest: /home/ubuntu/backend
 
-- name: "use pm2 to run backend"
-  shell: |
-    cd backend/
-    npm install
-    pm2 stop backend
-    pm2 start dist/main.js --name "backend" -i max
+- name: Install dependencies
+  command: npm install
+  args:
+    chdir: /home/ubuntu/backend
+  
+- name: Use pm2 to run backend
+  command: pm2 start dist/main.js --name "backend" -i max
+  args:
+    chdir: /home/ubuntu/backend
