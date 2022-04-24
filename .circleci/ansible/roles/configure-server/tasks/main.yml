@@ -18,11 +18,3 @@
     global: yes
     production: yes
     state: present
-
-- name: Basic usage
-  debug:
-    msg: "'{{ lookup('env', 'TYPEORM_CONNECTION') }}' is the TYPEORM_CONNECTION environment variable."
-
-- name: Example how to set default value if the variable is not defined
-  debug:
-    msg: "'{{ lookup('env', 'TYPEORM_ENTITIES') | default('nobody', True) }}' is the user."
