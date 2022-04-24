@@ -11,7 +11,7 @@ import {
 import { AggregateRoot } from '../../../common/entities';
 import { ProductAddedToOrder } from '../events/ProductAddedToOrder';
 
-@Entity()
+@Entity('order')
 export class Order extends AggregateRoot<string> {
   constructor(params: { id: string; products?: Product[] } = {} as Order) {
     super();

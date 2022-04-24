@@ -108,6 +108,7 @@ export class ConfigService {
       logging: this.envConfig.TYPEORM_LOGGING === 'true',
       extra: { max: 4, min: 1 },
       synchronize: false,
+      autoLoadEntities: true
     };
   }
 
