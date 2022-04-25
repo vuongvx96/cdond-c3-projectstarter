@@ -1,0 +1,15 @@
+[URL01] GitHub repository
+https://github.com/vuongvx96/cdond-c3-projectstarter
+
+[URL02] S3 Bucket
+http://udapeople-e97f5a0.s3-website-us-east-1.amazonaws.com
+
+[URL03] Cloudfront
+http://d22t9hg8wvyp0s.cloudfront.net/#/employees
+
+[URL04] Backend
+http://54.83.71.36:3030/api/status
+
+[URL05] Prometheus
+http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/targets
+http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/graph
