@@ -2,14 +2,15 @@
 https://github.com/vuongvx96/cdond-c3-projectstarter
 
 [URL02] S3 Bucket
-http://udapeople-e97f5a0.s3-website-us-east-1.amazonaws.com
+http://udapeople-727b6fc.s3-website-us-east-1.amazonaws.com
 
 [URL03] Cloudfront
-http://d22t9hg8wvyp0s.cloudfront.net/#/employees
+http://d22t9hg8wvyp0s.cloudfront.net
 
 [URL04] Backend
-http://54.83.71.36:3030/api/status
+http://3.216.27.43:3030/api/status
 
 [URL05] Prometheus
 http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/targets
 http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/graph
+http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/graph?g0.expr=node_memory_MemTotal_bytes%20-%20node_memory_MemFree_bytes&g0.tab=0&g0.stacked=0&g0.show_exemplars=0&g0.range_input=1h&g1.expr=100%20-%20(avg(rate(node_cpu_seconds_total%7Bmode%3D%22idle%22%7D%5B30m%5D))%20*%20100)&g1.tab=0&g1.stacked=0&g1.show_exemplars=0&g1.range_input=1h&g2.expr=rate(node_disk_io_time_seconds_total%5B5m%5D)%20*%20100&g2.tab=0&g2.stacked=0&g2.show_exemplars=0&g2.range_input=1h
