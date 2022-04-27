@@ -2,13 +2,13 @@
 https://github.com/vuongvx96/cdond-c3-projectstarter
 
 [URL02] S3 Bucket
-http://udapeople-727b6fc.s3-website-us-east-1.amazonaws.com
+http://udapeople-6e893f6.s3-website-us-east-1.amazonaws.com
 
 [URL03] Cloudfront
 http://d22t9hg8wvyp0s.cloudfront.net
 
 [URL04] Backend
-http://3.216.27.43:3030/api/status
+http://3.218.179.206:3030/api/status
 
 [URL05] Prometheus
 http://ec2-54-174-32-52.compute-1.amazonaws.com:9090/targets
